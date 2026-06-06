@@ -12,3 +12,6 @@
 # workflow
 - Build backend first, then frontend. Confidence: 0.65
 
+# ai
+- For Cerebras API: use gpt-oss-120b or zai-glm-4.7 as the model (not llama-4-scout). Confidence: 0.70
+

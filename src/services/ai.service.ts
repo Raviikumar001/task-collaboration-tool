@@ -12,7 +12,7 @@ export async function generateTaskDescription(title: string): Promise<string> {
   }
 
   const response = await client.chat.completions.create({
-    model: 'llama-4-scout-17b-16e-instruct',
+    model: 'gpt-oss-120b',
     messages: [
       {
         role: 'system',
