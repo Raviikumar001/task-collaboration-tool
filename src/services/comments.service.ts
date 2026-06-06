@@ -2,6 +2,7 @@ import prisma from '../prisma';
 import { AppError } from '../utils/errors';
 import fs from 'fs';
 import path from 'path';
+import { createNotification } from './notifications.service';
 
 export async function addComment(taskId: string, content: string, userId: string) {
   const task = await prisma.task.findUnique({ where: { id: taskId } });
@@ -12,12 +13,34 @@ export async function addComment(taskId: string, content: string, userId: string
   });
   if (!membership) throw new AppError('You are not a member of this team', 403);
 
-  return prisma.comment.create({
+  const comment = await prisma.comment.create({
     data: { content, taskId, userId },
     include: {
       user: { select: { id: true, name: true, email: true } },
     },
   });
+
+  if (task.assignedTo && task.assignedTo !== userId) {
+    createNotification(
+      'comment_added',
+      `New comment on "${task.title}"`,
+      task.assignedTo,
+      taskId,
+      userId,
+    ).catch(() => {});
+  }
+
+  if (task.createdBy !== userId && task.createdBy !== task.assignedTo) {
+    createNotification(
+      'comment_added',
+      `New comment on "${task.title}"`,
+      task.createdBy,
+      taskId,
+      userId,
+    ).catch(() => {});
+  }
+
+  return comment;
 }
 
 export async function getComments(taskId: string, userId: string) {

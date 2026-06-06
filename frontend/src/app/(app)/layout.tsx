@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { NotificationBell } from '@/components/notifications/notification-bell';
 
 function Sidebar() {
   const pathname = usePathname();
@@ -116,7 +117,12 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 p-6 lg:p-8 pt-16 lg:pt-8">{children}</main>
+      <main className="flex-1 p-6 lg:p-8 pt-16 lg:pt-8">
+        <div className="fixed top-4 right-4 z-50">
+          <NotificationBell />
+        </div>
+        {children}
+      </main>
     </div>
   );
 }

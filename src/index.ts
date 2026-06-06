@@ -1,8 +1,13 @@
+import http from 'http';
 import app from './app';
 import { config } from './config/env';
 import prisma from './prisma';
+import { initSocket } from './lib/socket';
 
-const server = app.listen(parseInt(config.PORT), () => {
+const server = http.createServer(app);
+initSocket(server);
+
+server.listen(parseInt(config.PORT), () => {
   console.log(`🚀 Server running on http://localhost:${config.PORT}`);
   console.log(`📦 Environment: ${config.NODE_ENV}`);
 });

@@ -2,6 +2,7 @@ import prisma from '../prisma';
 import { AppError } from '../utils/errors';
 import { CreateTaskInput, UpdateTaskInput } from '../validators/tasks.validator';
 import { Prisma } from '@prisma/client';
+import { createNotification } from './notifications.service';
 
 export async function createTask(data: CreateTaskInput, createdBy: string) {
   const membership = await prisma.teamMember.findUnique({
@@ -160,7 +161,7 @@ export async function updateTask(
   if (data.dueDate !== undefined) updateData.dueDate = data.dueDate ? new Date(data.dueDate) : null;
   if (data.assignedTo !== undefined) updateData.assignedTo = data.assignedTo;
 
-  return prisma.task.update({
+  const updated = await prisma.task.update({
     where: { id: taskId },
     data: updateData,
     include: {
@@ -169,6 +170,18 @@ export async function updateTask(
       team: { select: { id: true, name: true } },
     },
   });
+
+  if (data.assignedTo && data.assignedTo !== task.assignedTo) {
+    createNotification(
+      'task_assigned',
+      `You were assigned to "${task.title}"`,
+      data.assignedTo,
+      taskId,
+      userId,
+    ).catch(() => {});
+  }
+
+  return updated;
 }
 
 export async function deleteTask(taskId: string, userId: string) {
@@ -202,7 +215,7 @@ export async function assignTask(taskId: string, assigneeId: string, userId: str
     throw new AppError('Assignee is not a member of this team', 400);
   }
 
-  return prisma.task.update({
+  const updated = await prisma.task.update({
     where: { id: taskId },
     data: { assignedTo: assigneeId },
     include: {
@@ -211,6 +224,16 @@ export async function assignTask(taskId: string, assigneeId: string, userId: str
       team: { select: { id: true, name: true } },
     },
   });
+
+  createNotification(
+    'task_assigned',
+    `You were assigned to "${task.title}"`,
+    assigneeId,
+    taskId,
+    userId,
+  ).catch(() => {});
+
+  return updated;
 }
 
 export async function updateTaskStatus(
