@@ -7,6 +7,7 @@
 
 # git
 - Initialize git at the start of the project and use conventional commits for meaningful changes. Confidence: 0.70
+- Make meaningful incremental commits as milestones are completed during development. Confidence: 0.75
 
 # workflow
 - Build backend first, then frontend. Confidence: 0.65
