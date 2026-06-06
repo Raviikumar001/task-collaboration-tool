@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCreateTask } from '@/hooks/use-tasks';
 import { useTeams } from '@/hooks/use-teams';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -24,14 +23,7 @@ export default function NewTaskPage() {
   const router = useRouter();
   const createTask = useCreateTask();
   const { data: teams } = useTeams();
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<TaskForm>();
-  const selectedTeamId = watch('teamId');
-
-  const [teamMembers, setTeamMembers] = useState<{ id: string; name: string }[]>([]);
-
-  // We need to fetch team members when team changes
-  // For simplicity, we'll skip inline member fetch — assignment can be done after creation
-  // This is cleaner than adding more complexity
+  const { register, handleSubmit, formState: { errors } } = useForm<TaskForm>();
 
   async function onSubmit(data: TaskForm) {
     try {
@@ -104,7 +96,7 @@ export default function NewTaskPage() {
               />
             </div>
             <div className="flex gap-3 pt-2">
-              <Button type="button" variant="outline" onClick={() => router.back()}>
+              <Button type="button" variant="outline" onClick={() => router.push('/tasks')}>
                 Cancel
               </Button>
               <Button type="submit" className="flex-1" disabled={createTask.isPending}>

@@ -29,19 +29,22 @@ interface TaskFilters {
   order?: string;
   page?: number;
   limit?: number;
+  enabled?: boolean;
 }
 
 export function useTasks(filters: TaskFilters = {}) {
+  const { enabled, ...rest } = filters;
   return useQuery({
-    queryKey: ['tasks', filters],
+    queryKey: ['tasks', rest],
     queryFn: async () => {
       const params = new URLSearchParams();
-      Object.entries(filters).forEach(([k, v]) => {
-        if (v !== undefined && v !== '') params.set(k, String(v));
+      Object.entries(rest).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && v !== '') params.set(k, String(v));
       });
       const res = await api.get(`/tasks?${params}`);
       return res.data;
     },
+    enabled: enabled !== false,
   });
 }
 

@@ -14,7 +14,8 @@ import { toast } from 'sonner';
 import { UserPlus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 
 export default function TeamDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const params = useParams();
+  const id = params.id as string;
   const { user } = useAuth();
   const { data: team, isLoading } = useTeam(id);
   const addMember = useAddMember();
@@ -115,7 +116,8 @@ export default function TeamDetailPage() {
                       {member.role === 'MEMBER' ? (
                         <button
                           onClick={() => onPromote(member.userId)}
-                          className="p-1 text-gray-400 hover:text-blue-600"
+                          disabled={updateRole.isPending}
+                          className="p-1 text-gray-400 hover:text-blue-600 disabled:opacity-50"
                           title="Promote to Admin"
                         >
                           <ChevronUp className="w-4 h-4" />
@@ -123,7 +125,8 @@ export default function TeamDetailPage() {
                       ) : (
                         <button
                           onClick={() => onDemote(member.userId)}
-                          className="p-1 text-gray-400 hover:text-yellow-600"
+                          disabled={updateRole.isPending}
+                          className="p-1 text-gray-400 hover:text-yellow-600 disabled:opacity-50"
                           title="Demote to Member"
                         >
                           <ChevronDown className="w-4 h-4" />
@@ -134,7 +137,8 @@ export default function TeamDetailPage() {
                   {isOwnerOrAdmin && member.role !== 'OWNER' && member.userId !== user?.id && (
                     <button
                       onClick={() => onRemoveMember(member.userId)}
-                      className="p-1 text-gray-400 hover:text-red-600"
+                      disabled={removeMember.isPending}
+                      className="p-1 text-gray-400 hover:text-red-600 disabled:opacity-50"
                       title="Remove member"
                     >
                       <Trash2 className="w-4 h-4" />

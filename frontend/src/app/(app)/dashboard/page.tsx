@@ -5,24 +5,16 @@ import { useTasks } from '@/hooks/use-tasks';
 import { useTeams } from '@/hooks/use-teams';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { statusBadge } from '@/lib/constants';
 import { CheckSquare, Users, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { data: tasksData } = useTasks({ assignedTo: user?.id, limit: 5 });
+  const { data: tasksData } = useTasks({ assignedTo: user?.id, limit: 5, enabled: !!user });
   const { data: teams } = useTeams();
-  const { data: allTasks } = useTasks({ limit: 5 });
-
-  const statusBadge = (status: string) => {
-    const map: Record<string, 'warning' | 'info' | 'success'> = {
-      OPEN: 'warning',
-      IN_PROGRESS: 'info',
-      COMPLETED: 'success',
-    };
-    return map[status] || 'default';
-  };
+  const { data: allTasks } = useTasks({ limit: 5, enabled: !!user });
 
   return (
     <div>

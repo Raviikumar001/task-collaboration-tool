@@ -1,4 +1,3 @@
-import { type ClassValue } from 'clsx';
 import { cn } from '@/lib/utils';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

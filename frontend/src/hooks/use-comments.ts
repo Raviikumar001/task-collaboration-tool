@@ -77,9 +77,7 @@ export function useUploadAttachment() {
     mutationFn: async ({ taskId, file }: { taskId: string; file: File }) => {
       const formData = new FormData();
       formData.append('file', file);
-      const res = await api.post(`/tasks/${taskId}/comments/attachments`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const res = await api.post(`/tasks/${taskId}/comments/attachments`, formData);
       return res.data.data;
     },
     onSuccess: (_, vars) => {

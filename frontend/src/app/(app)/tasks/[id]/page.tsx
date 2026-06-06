@@ -16,23 +16,7 @@ import { format } from 'date-fns';
 import { Trash2, Paperclip, Send, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
-const statusBadge = (status: string) => {
-  const map: Record<string, 'warning' | 'info' | 'success'> = {
-    OPEN: 'warning',
-    IN_PROGRESS: 'info',
-    COMPLETED: 'success',
-  };
-  return map[status] || 'default';
-};
-
-const priorityBadge = (priority: string) => {
-  const map: Record<string, 'danger' | 'warning' | 'default'> = {
-    HIGH: 'danger',
-    MEDIUM: 'warning',
-    LOW: 'default',
-  };
-  return map[priority] || 'default';
-};
+import { statusBadge, priorityBadge } from '@/lib/constants';
 
 function formatFileSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -41,7 +25,8 @@ function formatFileSize(bytes: number) {
 }
 
 export default function TaskDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const params = useParams();
+  const id = params.id as string;
   const { user } = useAuth();
   const { data: task, isLoading: taskLoading } = useTask(id);
   const { data: comments } = useComments(id);
@@ -58,8 +43,6 @@ export default function TaskDetailPage() {
 
   const [commentText, setCommentText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const team = teams?.find((t: { id: string }) => t.id === task?.teamId);
 
   async function handleStatusChange(status: string) {
     try {
@@ -119,8 +102,8 @@ export default function TaskDetailPage() {
             <span>· {format(new Date(task.createdAt), 'MMM d, yyyy')}</span>
           </div>
         </div>
-        <Button variant="destructive" size="sm" onClick={handleDelete}>
-          <Trash2 className="w-4 h-4 mr-1" /> Delete
+        <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleteTask.isPending}>
+          <Trash2 className="w-4 h-4 mr-1" /> {deleteTask.isPending ? 'Deleting...' : 'Delete'}
         </Button>
       </div>
 
@@ -158,7 +141,8 @@ export default function TaskDetailPage() {
                         {c.userId === user?.id && (
                           <button
                             onClick={() => deleteComment.mutate({ taskId: id, commentId: c.id })}
-                            className="text-gray-400 hover:text-red-600 text-xs"
+                            disabled={deleteComment.isPending}
+                            className="text-gray-400 hover:text-red-600 text-xs disabled:opacity-50"
                           >
                             <Trash2 className="w-3 h-3" />
                           </button>
@@ -204,7 +188,8 @@ export default function TaskDetailPage() {
                       {a.uploadedBy === user?.id && (
                         <button
                           onClick={() => deleteAttachment.mutate({ taskId: id, attachmentId: a.id })}
-                          className="text-gray-400 hover:text-red-600"
+                          disabled={deleteAttachment.isPending}
+                          className="text-gray-400 hover:text-red-600 disabled:opacity-50"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

@@ -1,10 +1,7 @@
 'use client';
 
-import { AuthProvider } from '@/providers/auth-provider';
-import { QueryProvider } from '@/providers/query-provider';
-import { Toaster } from 'sonner';
 import { useRouter, usePathname } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/providers/auth-provider';
 import {
   LayoutDashboard,
@@ -16,7 +13,6 @@ import {
   X,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 function Sidebar() {
@@ -126,12 +122,5 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 }
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <QueryProvider>
-      <AuthProvider>
-        <Toaster position="top-right" richColors />
-        <AuthGuard>{children}</AuthGuard>
-      </AuthProvider>
-    </QueryProvider>
-  );
+  return <AuthGuard>{children}</AuthGuard>;
 }

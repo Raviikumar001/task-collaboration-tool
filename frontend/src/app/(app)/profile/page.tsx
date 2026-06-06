@@ -17,7 +17,7 @@ interface ProfileForm {
 }
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const [saving, setSaving] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm<ProfileForm>({
     defaultValues: {
@@ -42,6 +42,9 @@ export default function ProfilePage() {
         return;
       }
       await api.put(`/users/${user?.id}`, payload);
+      if (user) {
+        setUser({ ...user, name: data.name, email: data.email });
+      }
       toast.success('Profile updated');
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed';

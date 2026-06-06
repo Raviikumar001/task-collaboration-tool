@@ -8,27 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { statusBadge, priorityBadge } from '@/lib/constants';
 import { Plus, Search } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
-
-const statusBadge = (status: string) => {
-  const map: Record<string, 'warning' | 'info' | 'success'> = {
-    OPEN: 'warning',
-    IN_PROGRESS: 'info',
-    COMPLETED: 'success',
-  };
-  return map[status] || 'default';
-};
-
-const priorityBadge = (priority: string) => {
-  const map: Record<string, 'danger' | 'warning' | 'default'> = {
-    HIGH: 'danger',
-    MEDIUM: 'warning',
-    LOW: 'default',
-  };
-  return map[priority] || 'default';
-};
 
 export default function TasksPage() {
   const [status, setStatus] = useState('');
