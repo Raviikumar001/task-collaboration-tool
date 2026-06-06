@@ -1,5 +1,7 @@
 import prisma from '../prisma';
 import { AppError } from '../utils/errors';
+import fs from 'fs';
+import path from 'path';
 
 export async function addComment(taskId: string, content: string, userId: string) {
   const task = await prisma.task.findUnique({ where: { id: taskId } });
@@ -113,4 +115,7 @@ export async function deleteAttachment(attachmentId: string, userId: string) {
   }
 
   await prisma.attachment.delete({ where: { id: attachmentId } });
+
+  const filePath = path.join(__dirname, '../..', attachment.url);
+  fs.unlink(filePath, () => {});
 }
