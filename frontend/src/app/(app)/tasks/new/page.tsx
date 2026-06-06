@@ -3,12 +3,14 @@
 import { useRouter } from 'next/navigation';
 import { useCreateTask } from '@/hooks/use-tasks';
 import { useTeams } from '@/hooks/use-teams';
+import { useGenerateDescription } from '@/hooks/use-ai';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { Sparkles } from 'lucide-react';
 
 interface TaskForm {
   title: string;
@@ -23,7 +25,25 @@ export default function NewTaskPage() {
   const router = useRouter();
   const createTask = useCreateTask();
   const { data: teams } = useTeams();
-  const { register, handleSubmit, formState: { errors } } = useForm<TaskForm>();
+  const generateDescription = useGenerateDescription();
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<TaskForm>();
+
+  const titleValue = watch('title');
+
+  async function handleGenerateDescription() {
+    if (!titleValue || titleValue.trim().length < 3) {
+      toast.error('Enter a task title first (at least 3 characters)');
+      return;
+    }
+    try {
+      const description = await generateDescription.mutateAsync(titleValue);
+      setValue('description', description);
+      toast.success('Description generated');
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to generate';
+      toast.error(message);
+    }
+  }
 
   async function onSubmit(data: TaskForm) {
     try {
@@ -57,12 +77,23 @@ export default function NewTaskPage() {
               {...register('title', { required: 'Title is required' })}
             />
             <div className="space-y-1">
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+              <div className="flex items-center justify-between">
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+                <button
+                  type="button"
+                  onClick={handleGenerateDescription}
+                  disabled={generateDescription.isPending}
+                  className="inline-flex items-center gap-1 text-xs text-purple-600 hover:text-purple-800 font-medium disabled:opacity-50"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  {generateDescription.isPending ? 'Generating...' : 'Generate with AI'}
+                </button>
+              </div>
               <textarea
                 id="description"
                 rows={4}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="Describe the task..."
+                placeholder="Describe the task... or use AI to generate one"
                 {...register('description')}
               />
             </div>

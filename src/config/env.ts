@@ -9,6 +9,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string(),
   JWT_EXPIRES_IN: z.string().default('7d'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  CEREBRAS_API_KEY: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

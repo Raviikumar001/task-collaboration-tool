@@ -12,6 +12,7 @@ import tasksRoutes from './routes/tasks.routes';
 import teamsRoutes from './routes/teams.routes';
 import commentsRoutes from './routes/comments.routes';
 import notificationsRoutes from './routes/notifications.routes';
+import aiRoutes from './routes/ai.routes';
 
 const app = express();
 
@@ -55,6 +56,7 @@ app.use('/api/tasks', tasksRoutes);
 app.use('/api/teams', teamsRoutes);
 app.use('/api/tasks/:taskId/comments', commentsRoutes);
 app.use('/api/notifications', notificationsRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {
