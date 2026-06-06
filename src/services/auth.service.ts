@@ -57,7 +57,8 @@ export async function getProfile(userId: string) {
 }
 
 function generateToken(id: string, email: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return jwt.sign({ id, email }, config.JWT_SECRET, {
-    expiresIn: config.JWT_EXPIRES_IN,
+    expiresIn: config.JWT_EXPIRES_IN as any,
   });
 }

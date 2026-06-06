@@ -16,6 +16,10 @@ declare global {
   }
 }
 
+export function param(req: Request, name: string): string {
+  return req.params[name] as string;
+}
+
 export function authenticate(req: Request, _res: Response, next: NextFunction) {
   const token =
     req.cookies?.token || req.headers.authorization?.replace('Bearer ', '');

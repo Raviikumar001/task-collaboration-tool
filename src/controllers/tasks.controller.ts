@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import * as tasksService from '../services/tasks.service';
 import { sendSuccess, sendPaginated } from '../utils/response';
+import { param } from '../middleware/auth';
 
 export async function createTask(req: Request, res: Response, next: NextFunction) {
   try {
@@ -45,7 +46,7 @@ export async function getTasks(req: Request, res: Response, next: NextFunction) 
 
 export async function getTask(req: Request, res: Response, next: NextFunction) {
   try {
-    const task = await tasksService.getTaskById(req.params.id, req.user!.id);
+    const task = await tasksService.getTaskById(param(req, 'id'), req.user!.id);
     sendSuccess(res, task);
   } catch (err) {
     next(err);
@@ -54,7 +55,7 @@ export async function getTask(req: Request, res: Response, next: NextFunction) {
 
 export async function updateTask(req: Request, res: Response, next: NextFunction) {
   try {
-    const task = await tasksService.updateTask(req.params.id, req.body, req.user!.id);
+    const task = await tasksService.updateTask(param(req, 'id'), req.body, req.user!.id);
     sendSuccess(res, task);
   } catch (err) {
     next(err);
@@ -63,7 +64,7 @@ export async function updateTask(req: Request, res: Response, next: NextFunction
 
 export async function deleteTask(req: Request, res: Response, next: NextFunction) {
   try {
-    await tasksService.deleteTask(req.params.id, req.user!.id);
+    await tasksService.deleteTask(param(req, 'id'), req.user!.id);
     sendSuccess(res, { message: 'Task deleted successfully' });
   } catch (err) {
     next(err);
@@ -72,7 +73,7 @@ export async function deleteTask(req: Request, res: Response, next: NextFunction
 
 export async function assignTask(req: Request, res: Response, next: NextFunction) {
   try {
-    const task = await tasksService.assignTask(req.params.id, req.body.userId, req.user!.id);
+    const task = await tasksService.assignTask(param(req, 'id'), req.body.userId, req.user!.id);
     sendSuccess(res, task);
   } catch (err) {
     next(err);
@@ -82,7 +83,7 @@ export async function assignTask(req: Request, res: Response, next: NextFunction
 export async function updateStatus(req: Request, res: Response, next: NextFunction) {
   try {
     const task = await tasksService.updateTaskStatus(
-      req.params.id,
+      param(req, 'id'),
       req.body.status,
       req.user!.id,
     );

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import * as teamsService from '../services/teams.service';
 import { sendSuccess } from '../utils/response';
+import { param } from '../middleware/auth';
 
 export async function createTeam(req: Request, res: Response, next: NextFunction) {
   try {
@@ -26,7 +27,7 @@ export async function getTeams(req: Request, res: Response, next: NextFunction) 
 
 export async function getTeam(req: Request, res: Response, next: NextFunction) {
   try {
-    const team = await teamsService.getTeamById(req.params.id, req.user!.id);
+    const team = await teamsService.getTeamById(param(req, 'id'), req.user!.id);
     sendSuccess(res, team);
   } catch (err) {
     next(err);
@@ -36,7 +37,7 @@ export async function getTeam(req: Request, res: Response, next: NextFunction) {
 export async function addMember(req: Request, res: Response, next: NextFunction) {
   try {
     const member = await teamsService.addMember(
-      req.params.id,
+      param(req, 'id'),
       req.body.email,
       req.body.role,
       req.user!.id,
@@ -50,8 +51,8 @@ export async function addMember(req: Request, res: Response, next: NextFunction)
 export async function removeMember(req: Request, res: Response, next: NextFunction) {
   try {
     await teamsService.removeMember(
-      req.params.id,
-      req.params.userId,
+      param(req, 'id'),
+      param(req, 'userId'),
       req.user!.id,
     );
     sendSuccess(res, { message: 'Member removed successfully' });
@@ -63,8 +64,8 @@ export async function removeMember(req: Request, res: Response, next: NextFuncti
 export async function updateMemberRole(req: Request, res: Response, next: NextFunction) {
   try {
     const member = await teamsService.updateMemberRole(
-      req.params.id,
-      req.params.userId,
+      param(req, 'id'),
+      param(req, 'userId'),
       req.body.role,
       req.user!.id,
     );
