@@ -58,9 +58,9 @@ export default function RegisterPage() {
             id="password"
             type="password"
             label="Password"
-            placeholder="At least 6 characters"
+            placeholder="8+ chars, uppercase, lowercase, digit, special"
             error={errors.password?.message}
-            {...register('password', { required: 'Password is required', minLength: { value: 6, message: 'Minimum 6 characters' } })}
+            {...register('password', { required: 'Password is required' })}
           />
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Creating account...' : 'Create Account'}

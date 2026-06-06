@@ -15,3 +15,6 @@
 # ai
 - For Cerebras API: use gpt-oss-120b or zai-glm-4.7 as the model (not llama-4-scout). Confidence: 0.70
 
+# documentation
+- Write READMEs in natural, personal language as if the user wrote it themselves, never framing the project as an assignment. Confidence: 0.70
+

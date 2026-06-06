@@ -22,12 +22,12 @@ interface Attachment {
   uploader: { id: string; name: string; email: string };
 }
 
-export function useComments(taskId: string) {
+export function useComments(taskId: string, page = 1) {
   return useQuery({
-    queryKey: ['comments', taskId],
+    queryKey: ['comments', taskId, page],
     queryFn: async () => {
-      const res = await api.get(`/tasks/${taskId}/comments`);
-      return res.data.data as Comment[];
+      const res = await api.get(`/tasks/${taskId}/comments?page=${page}&limit=20`);
+      return { comments: res.data.data as Comment[], pagination: res.data.pagination };
     },
     enabled: !!taskId,
   });
