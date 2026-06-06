@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import multer from 'multer';
 import { AppError } from '../utils/errors';
 import { ZodError } from 'zod';
 import { JsonWebTokenError } from 'jsonwebtoken';
@@ -9,6 +10,21 @@ export function errorHandler(
   res: Response,
   _next: NextFunction,
 ) {
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({
+      success: false,
+      message: err.code === 'LIMIT_FILE_SIZE'
+        ? 'File too large. Maximum size is 10MB'
+        : `Upload error: ${err.message}`,
+    });
+  }
+
+  if (err.message === 'File type not allowed') {
+    return res.status(400).json({
+      success: false,
+      message: 'File type not allowed. Allowed: JPEG, PNG, GIF, PDF, TXT, DOC, DOCX',
+    });
+  }
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
       success: false,
