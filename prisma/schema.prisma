@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  createdTasks   Task[]       @relation("CreatedTasks")
+  assignedTasks  Task[]       @relation("AssignedTasks")
+  comments       Comment[]
+  uploadedFiles  Attachment[]
+  memberships    TeamMember[]
+  createdTeams   Team[]       @relation("CreatedTeams")
+}
+
+model Team {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdBy   String
+  createdAt   DateTime @default(now())
+
+  creator   User         @relation("CreatedTeams", fields: [createdBy], references: [id])
+  members   TeamMember[]
+  tasks     Task[]
+}
+
+model TeamMember {
+  id     String @id @default(uuid())
+  teamId String
+  userId String
+  role   Role   @default(MEMBER)
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model Task {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  status      Status    @default(OPEN)
+  priority    Priority  @default(MEDIUM)
+  dueDate     DateTime?
+  teamId      String
+  assignedTo  String?
+  createdBy   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  team      Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  assignee  User?       @relation("AssignedTasks", fields: [assignedTo], references: [id])
+  creator   User        @relation("CreatedTasks", fields: [createdBy], references: [id])
+  comments  Comment[]
+  attachments Attachment[]
+}
+
+enum Status {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  taskId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Attachment {
+  id         String   @id @default(uuid())
+  filename   String
+  url        String
+  mimeType   String
+  size       Int
+  taskId     String
+  uploadedBy String
+  createdAt  DateTime @default(now())
+
+  task     Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploader User @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+}
