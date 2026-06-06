@@ -16,7 +16,9 @@ const app = express();
 
 // Global middleware
 app.use(cors({
-  origin: config.NODE_ENV === 'production' ? 'https://your-frontend.com' : 'http://localhost:5173',
+  origin: config.NODE_ENV === 'production'
+    ? 'https://your-frontend.com'
+    : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173'],
   credentials: true,
 }));
 app.use(morgan('dev'));
@@ -43,7 +45,7 @@ const authLimiter = rateLimit({
 app.use('/api/auth', authLimiter);
 
 // Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
 
 // Routes
 app.use('/api/auth', authRoutes);
