@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import * as commentsService from '../services/comments.service';
-import { sendSuccess } from '../utils/response';
+import { sendSuccess, sendPaginated } from '../utils/response';
 import { AppError } from '../utils/errors';
 import { param } from '../middleware/auth';
 
@@ -19,8 +19,10 @@ export async function addComment(req: Request, res: Response, next: NextFunction
 
 export async function getComments(req: Request, res: Response, next: NextFunction) {
   try {
-    const comments = await commentsService.getComments(param(req, 'taskId'), req.user!.id);
-    sendSuccess(res, comments);
+    const page = Math.max(1, parseInt(req.query.page as string, 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string, 10) || 20));
+    const result = await commentsService.getComments(param(req, 'taskId'), req.user!.id, page, limit);
+    sendPaginated(res, result.comments, result.total, page, limit);
   } catch (err) {
     next(err);
   }

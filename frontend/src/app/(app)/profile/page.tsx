@@ -89,8 +89,8 @@ export default function ProfilePage() {
               id="password"
               type="password"
               label="New Password"
-              placeholder="At least 6 characters"
-              {...register('password', { minLength: { value: 6, message: 'Minimum 6 characters' } })}
+              placeholder="8+ chars, uppercase, lowercase, digit, special"
+              {...register('password')}
               error={errors.password?.message}
             />
             <Button type="submit" disabled={saving} className="w-full">

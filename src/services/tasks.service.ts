@@ -199,7 +199,7 @@ export async function deleteTask(taskId: string, userId: string) {
   await prisma.task.delete({ where: { id: taskId } });
 }
 
-export async function assignTask(taskId: string, assigneeId: string, userId: string) {
+export async function assignTask(taskId: string, assigneeId: string | null, userId: string) {
   const task = await prisma.task.findUnique({ where: { id: taskId } });
   if (!task) throw new AppError('Task not found', 404);
 
@@ -208,16 +208,18 @@ export async function assignTask(taskId: string, assigneeId: string, userId: str
   });
   if (!membership) throw new AppError('You are not a member of this team', 403);
 
-  const assigneeMembership = await prisma.teamMember.findUnique({
-    where: { teamId_userId: { teamId: task.teamId, userId: assigneeId } },
-  });
-  if (!assigneeMembership) {
-    throw new AppError('Assignee is not a member of this team', 400);
+  if (assigneeId) {
+    const assigneeMembership = await prisma.teamMember.findUnique({
+      where: { teamId_userId: { teamId: task.teamId, userId: assigneeId } },
+    });
+    if (!assigneeMembership) {
+      throw new AppError('Assignee is not a member of this team', 400);
+    }
   }
 
   const updated = await prisma.task.update({
     where: { id: taskId },
-    data: { assignedTo: assigneeId },
+    data: { assignedTo: assigneeId ?? null },
     include: {
       assignee: { select: { id: true, name: true, email: true } },
       creator: { select: { id: true, name: true, email: true } },
@@ -225,13 +227,15 @@ export async function assignTask(taskId: string, assigneeId: string, userId: str
     },
   });
 
-  createNotification(
-    'task_assigned',
-    `You were assigned to "${task.title}"`,
-    assigneeId,
-    taskId,
-    userId,
-  ).catch(() => {});
+  if (assigneeId) {
+    createNotification(
+      'task_assigned',
+      `You were assigned to "${task.title}"`,
+      assigneeId,
+      taskId,
+      userId,
+    ).catch(() => {});
+  }
 
   return updated;
 }

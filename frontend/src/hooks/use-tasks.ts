@@ -97,8 +97,8 @@ export function useDeleteTask() {
 export function useAssignTask() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, userId }: { id: string; userId: string }) => {
-      const res = await api.patch(`/tasks/${id}/assign`, { userId });
+    mutationFn: async ({ id, userId }: { id: string; userId: string | null }) => {
+      const res = await api.patch(`/tasks/${id}/assign`, { userId: userId ?? null });
       return res.data.data;
     },
     onSuccess: (_, vars) => {

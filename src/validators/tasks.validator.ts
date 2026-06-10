@@ -19,7 +19,7 @@ export const updateTaskSchema = z.object({
 });
 
 export const assignTaskSchema = z.object({
-  userId: z.string().uuid('Invalid user ID'),
+  userId: z.string().uuid('Invalid user ID').nullable().optional(),
 });
 
 export const statusSchema = z.object({

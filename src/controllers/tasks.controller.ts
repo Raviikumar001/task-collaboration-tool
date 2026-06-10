@@ -73,7 +73,8 @@ export async function deleteTask(req: Request, res: Response, next: NextFunction
 
 export async function assignTask(req: Request, res: Response, next: NextFunction) {
   try {
-    const task = await tasksService.assignTask(param(req, 'id'), req.body.userId, req.user!.id);
+    const assigneeId = req.body.userId === '' ? null : req.body.userId;
+    const task = await tasksService.assignTask(param(req, 'id'), assigneeId, req.user!.id);
     sendSuccess(res, task);
   } catch (err) {
     next(err);

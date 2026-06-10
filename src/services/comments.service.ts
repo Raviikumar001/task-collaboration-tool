@@ -43,7 +43,7 @@ export async function addComment(taskId: string, content: string, userId: string
   return comment;
 }
 
-export async function getComments(taskId: string, userId: string) {
+export async function getComments(taskId: string, userId: string, page = 1, limit = 20) {
   const task = await prisma.task.findUnique({ where: { id: taskId } });
   if (!task) throw new AppError('Task not found', 404);
 
@@ -52,13 +52,22 @@ export async function getComments(taskId: string, userId: string) {
   });
   if (!membership) throw new AppError('You are not a member of this team', 403);
 
-  return prisma.comment.findMany({
-    where: { taskId },
-    orderBy: { createdAt: 'desc' },
-    include: {
-      user: { select: { id: true, name: true, email: true } },
-    },
-  });
+  const skip = (page - 1) * limit;
+
+  const [comments, total] = await Promise.all([
+    prisma.comment.findMany({
+      where: { taskId },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit,
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+      },
+    }),
+    prisma.comment.count({ where: { taskId } }),
+  ]);
+
+  return { comments, total, page, limit };
 }
 
 export async function deleteComment(commentId: string, userId: string) {

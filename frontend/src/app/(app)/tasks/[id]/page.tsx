@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useTask, useUpdateTask, useDeleteTask, useAssignTask, useUpdateTaskStatus } from '@/hooks/use-tasks';
 import { useComments, useAddComment, useDeleteComment, useAttachments, useUploadAttachment, useDeleteAttachment } from '@/hooks/use-comments';
-import { useTeams } from '@/hooks/use-teams';
+import { useTeam } from '@/hooks/use-teams';
 import { useAuth } from '@/providers/auth-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,9 +29,8 @@ export default function TaskDetailPage() {
   const id = params.id as string;
   const { user } = useAuth();
   const { data: task, isLoading: taskLoading } = useTask(id);
-  const { data: comments } = useComments(id);
+  const { data: team } = useTeam(task?.teamId || '');
   const { data: attachments } = useAttachments(id);
-  const { data: teams } = useTeams();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
   const assignTask = useAssignTask();
@@ -42,7 +41,10 @@ export default function TaskDetailPage() {
   const deleteAttachment = useDeleteAttachment();
 
   const [commentText, setCommentText] = useState('');
+  const [commentPage, setCommentPage] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { data: commentData } = useComments(id, commentPage);
 
   async function handleStatusChange(status: string) {
     try {
@@ -53,8 +55,8 @@ export default function TaskDetailPage() {
 
   async function handleAssign(userId: string) {
     try {
-      await assignTask.mutateAsync({ id, userId });
-      toast.success('Task assigned');
+      await assignTask.mutateAsync({ id, userId: userId || null });
+      toast.success(userId ? 'Task assigned' : 'Task unassigned');
     } catch { toast.error('Failed'); }
   }
 
@@ -132,7 +134,7 @@ export default function TaskDetailPage() {
                 </Button>
               </div>
               <div className="space-y-3 max-h-80 overflow-y-auto">
-                {comments?.map((c: { id: string; content: string; user: { name: string }; createdAt: string; userId: string }) => (
+                {commentData?.comments?.map((c: { id: string; content: string; user: { name: string }; createdAt: string; userId: string }) => (
                   <div key={c.id} className="p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center justify-between mb-1">
                       <p className="text-sm font-medium">{c.user.name}</p>
@@ -152,7 +154,30 @@ export default function TaskDetailPage() {
                     <p className="text-sm text-gray-700">{c.content}</p>
                   </div>
                 ))}
-                {(!comments || comments.length === 0) && <p className="text-gray-400 text-sm py-4">No comments yet</p>}
+                {(!commentData?.comments || commentData.comments.length === 0) && <p className="text-gray-400 text-sm py-4">No comments yet</p>}
+                {commentData?.pagination && commentData.pagination.totalPages > 1 && (
+                  <div className="flex items-center justify-between pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={commentPage <= 1}
+                      onClick={() => setCommentPage(commentPage - 1)}
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-xs text-gray-400">
+                      Page {commentPage} of {commentData.pagination.totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={commentPage >= commentData.pagination.totalPages}
+                      onClick={() => setCommentPage(commentPage + 1)}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -226,11 +251,17 @@ export default function TaskDetailPage() {
               </div>
               <div>
                 <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Assignee</p>
-                {task.assignee ? (
-                  <p className="font-medium">{task.assignee.name}</p>
-                ) : (
-                  <p className="text-gray-400 text-sm">Unassigned</p>
-                )}
+                <Select
+                  value={task.assignedTo || ''}
+                  onChange={(e) => handleAssign(e.target.value)}
+                  options={[
+                    { value: '', label: 'Unassigned' },
+                    ...(team?.members?.map((m: { user: { id: string; name: string } }) => ({
+                      value: m.user.id,
+                      label: m.user.name,
+                    })) || []),
+                  ]}
+                />
               </div>
               {task.dueDate && (
                 <div>
