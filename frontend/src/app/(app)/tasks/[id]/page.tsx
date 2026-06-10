@@ -55,8 +55,8 @@ export default function TaskDetailPage() {
 
   async function handleAssign(userId: string) {
     try {
-      await assignTask.mutateAsync({ id, userId });
-      toast.success('Task assigned');
+      await assignTask.mutateAsync({ id, userId: userId || null });
+      toast.success(userId ? 'Task assigned' : 'Task unassigned');
     } catch { toast.error('Failed'); }
   }
 
