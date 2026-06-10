@@ -89,7 +89,7 @@ export default function ProfilePage() {
               id="password"
               type="password"
               label="New Password"
-              placeholder="8+ chars with uppercase, digit, and special"
+              placeholder="8+ chars, uppercase, lowercase, digit, special"
               {...register('password')}
               error={errors.password?.message}
             />
