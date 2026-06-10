@@ -19,8 +19,8 @@ export async function addComment(req: Request, res: Response, next: NextFunction
 
 export async function getComments(req: Request, res: Response, next: NextFunction) {
   try {
-    const page = req.query.page ? parseInt(req.query.page as string) : 1;
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+    const page = Math.max(1, parseInt(req.query.page as string, 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string, 10) || 20));
     const result = await commentsService.getComments(param(req, 'taskId'), req.user!.id, page, limit);
     sendPaginated(res, result.comments, result.total, page, limit);
   } catch (err) {
